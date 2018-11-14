@@ -42,12 +42,10 @@ The simple square clustering algorithm a rather straight-forward implementation 
 \ENDFOR
 \ENDFOR
 \STATE ${CAT} \gets \emptyset$
-\FORALL{$c \in C$}
 \FORALL{$i \in C.getInstances()$}
 \FORALL{$category \in i.getCategories()$}
 \STATE ${CAT}_{category} \gets {CAT}_{category}.getScore() + category.getScore()$
 \STATE ${CAT} \gets {CAT} \cap {CAT}_{category}$
-\ENDFOR
 \ENDFOR
 \ENDFOR
 \RETURN $max({CAT}.getAllScores())$
@@ -87,15 +85,14 @@ So the value depends on the number of instance’s categories and the weight of 
 \FORALL{$z \in \vec{y}$}
 \STATE $z \gets normalize~z~as~to~formula~(\ref{eq:normalization})$
 \ENDFOR
-\STATE $i.setLatitude(x)$
+\STATE $i.categories \gets \vec{y}$
 \ENDFOR
+\STATE $dBScan(I)$
 \STATE ${CAT} \gets \emptyset$
-\FORALL{$c \in C$}
 \FORALL{$i \in C.getInstances()$}
 \FORALL{$category \in i.getCategories()$}
 \STATE ${CAT}_{category} \gets {CAT}_{category}.getScore() + category.getScore()$
 \STATE ${CAT} \gets {CAT} \cap {CAT}_{category}$
-\ENDFOR
 \ENDFOR
 \ENDFOR
 \RETURN $max({CAT}.getAllScores())$
