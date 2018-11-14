@@ -23,17 +23,84 @@ Before clustering takes place, no instance is assigned to a cluster, as no clust
 
 
 \paragraph{Simple Square Clustering }
-The simple square clustering algorithm a rather straight-forward implementation of clustering algorithms. It considers each element from the list of instances and creates clusters based on their position. So for each instance, the simple square clustering implementation will check if there is already a cluster, in which the current instance is located and will assign it to this cluster or create a new cluster correspondingly. After having done so for the entire list of instances, each clusters gets a category. The computation is based on a scoring function, which determines the times, a category appears in a cluster and weights each appearance by the category’s weight-property. The category with the highest weight is then allocated to a cluster. In sum, the simple square clustering algorithm does not take into account the semantic context (i.e. the categories) of instances and only uses positional information initially. That is why the results are not guaranteed to be semantically meaningful. However, the algorithm runs very fast, as it is linked to very little computational overhead.
+The simple square clustering algorithm a rather straight-forward implementation of clustering algorithms. It considers each element from the list of instances and creates clusters based on their position. So for each instance, the simple square clustering implementation will check if there is already a cluster, in which the current instance is located and will assign it to this cluster or create a new cluster correspondingly. After having done so for the entire list of instances, each clusters gets a category. The computation is based on a scoring function, which determines the times, a category appears in a cluster and weights each appearance by the category’s weight-property. The category with the highest weight is then allocated to a cluster. Algorithm \ref{alg:ssca} formalizes the procedures again. In sum, the simple square clustering algorithm does not take into account the semantic context (i.e. the categories) of instances and only uses positional information initially. That is why the results are not guaranteed to be semantically meaningful. However, the algorithm runs very fast, as it is linked to very little computational overhead.
+
+
+\begin{algorithm}
+\caption{Sketch of the simple quare clustering algorithm}\label{alg:ssca}
+\begin{algorithmic} 
+\STATE $I \gets \text{set~of~all~instances}$
+\STATE $C \gets \emptyset$
+\FORALL{$i \in I$}
+\FORALL{$c \in C$}
+ \IF{$i~located~in~c$}
+  \STATE $c.add(i)$
+  \ELSE 
+  \STATE $x \gets createCluster(i.latitude, i.longitude)$
+  \STATE $C \gets C \cap x$
+\ENDIF
+\ENDFOR
+\ENDFOR
+\STATE ${CAT} \gets \emptyset$
+\FORALL{$c \in C$}
+\FORALL{$i \in C.getInstances()$}
+\FORALL{$category \in i.getCategories()$}
+\STATE ${CAT}_{category} \gets {CAT}_{category}.getScore() + category.getScore()$
+\STATE ${CAT} \gets {CAT} \cap {CAT}_{category}$
+\ENDFOR
+\ENDFOR
+\ENDFOR
+\RETURN $max({CAT}.getAllScores())$
+\end{algorithmic}
+\end{algorithm}
 
 \paragraph{DBScan}
 DBScan is a the sophisticated clustering algorithm in the semap project and relies on the Weka library implementation. The DBScan tries to build clusters based on two pieces of information: The position of instances and their categories. The position is determined by the longitude and latitude coordinates and is normalized on a scale from zero to one; alternatively it can be z-normalized by a parameter setting in the Java coding. Categories are one-hot-encoded, so that each instance gets a vectors consisting of values in the range from one to zero. The vector represents the set of all categories. Each category is represented by a positional value in the vector. All the categories an instance does not belong to, take the value 0 in the vector. The categories, an instance belongs to, take a normalized value greater than zero. The value is determined by the formula: 
-
-\[n := number~of~categories~of~an~instance \]
-\[w_i := weight~of~the~i\-th~category~of~an~instance \]
-\[w_c := weight~of~current~category \]
-\[val = \frac{w_c}{\sum_{i=0}^{n}w_i} \]
+\begin{equation}
+n := number~of~categories~of~an~instance
+\end{equation}
+\begin{equation}
+w_i := weight~of~the~i\-th~category~of~an~instance
+\end{equation}
+\begin{equation}
+w_c := weight~of~current~category
+\end{equation}
+\begin{equation}\label{eq:normalization}
+val = \frac{w_c}{\sum_{i=0}^{n}w_i}
+\end{equation}
 
 
 Weight of current category/sum of categories of an instance(weight)
-So the value depends on the number of instance’s categories and the weight of the respective categories. This method ensures, that the weighted vector values have the same impact on the clustering as the positional information latitude and longitude. Before the DBScan algorithm can start working in Weka, a preprocessing pipeline transform the internal object representation as described in figure \ref{fig:cos} into the object representation needed by the Weka library. It therefore writes an artificial .arff-file to disk and reads it again with tools from the weka library. Afterwards, the DBScan is executed and the results again returned into the core object representation of semap. In sum, the value normalization and object transformations are computationally expensive operations. While for example the simple square algorithm clusters multiple millions of instances within few milliseconds, the DBScan requires about 30 seconds to do so with only 15 thousand instances. However, the major part of this timeframe is not spent in the normalization and object transformation implementation. The most time is actually needed by Weka’s DBScan algorithm itself. So this runtime behavior is a major limitation of the DBScan algorithm. Nonetheless, the DBScan algorithm is capable of finding much more meaningful results. It considers categories of instances already when performing the clustering and not afterwards. It is also not limited to geographically speaking squared clusters, but has arbitrary decision boundaries. That makes this algorithm a very powerful tool for detailed analyses on regional, public data.
+So the value depends on the number of instance’s categories and the weight of the respective categories. This method ensures, that the weighted vector values have the same impact on the clustering as the positional information latitude and longitude. Before the DBScan algorithm can start working in Weka, a preprocessing pipeline transform the internal object representation as described in figure \ref{fig:cos} into the object representation needed by the Weka library. It therefore writes an artificial .arff-file to disk and reads it again with tools from the weka library. Afterwards, the DBScan is executed and the results again returned into the core object representation of semap. The entire procedure of the DBScan in the semap project is summarized in algorithm \ref{alg:dbscan} as follows:
+
+\begin{algorithm}
+\caption{Sketch of the DBScan clustering algorithm}\label{alg:dbscan}
+\begin{algorithmic} 
+\STATE $I \gets \text{set~of~all~instances}$
+\STATE $C \gets \emptyset$
+\FORALL{$i \in I$}
+\STATE $x \gets normalize(i.latitude)$
+\STATE $i.setLatitude(x)$
+\STATE $x \gets normalize(i.longitude)$
+\STATE $i.setLongitude(x)$
+\STATE $\vec{y} \gets oneHotEncode(i.categories)$
+\FORALL{$z \in \vec{y}$}
+\STATE $z \gets normalize~z~as~to~formula~(\ref{eq:normalization})$
+\ENDFOR
+\STATE $i.setLatitude(x)$
+\ENDFOR
+\STATE ${CAT} \gets \emptyset$
+\FORALL{$c \in C$}
+\FORALL{$i \in C.getInstances()$}
+\FORALL{$category \in i.getCategories()$}
+\STATE ${CAT}_{category} \gets {CAT}_{category}.getScore() + category.getScore()$
+\STATE ${CAT} \gets {CAT} \cap {CAT}_{category}$
+\ENDFOR
+\ENDFOR
+\ENDFOR
+\RETURN $max({CAT}.getAllScores())$
+\end{algorithmic}
+\end{algorithm}
+
+In sum, the value normalization and object transformations are computationally expensive operations. While for example the simple square algorithm clusters multiple millions of instances within few milliseconds, the DBScan requires about 30 seconds to do so with only 15 thousand instances. However, the major part of this timeframe is not spent in the normalization and object transformation implementation. The most time is actually needed by Weka’s DBScan algorithm itself. So this runtime behavior is a major limitation of the DBScan algorithm. Nonetheless, the DBScan algorithm is capable of finding much more meaningful results. It considers categories of instances already when performing the clustering and not afterwards. It is also not limited to geographically speaking squared clusters, but has arbitrary decision boundaries. That makes this algorithm a very powerful tool for detailed analyses on regional, public data.
 
