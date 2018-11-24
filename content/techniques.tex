@@ -3,10 +3,24 @@ One of the main ideas during development was the decoupling of major steps in Se
 The frontend website is primarily responsible for the rendering of visual elements. The computation of clusters takes place on a separate backend server, which is contacted by the website using a REST-interface on the same backend server. The following sections will be based on this trisection and elaborate in more detail on each of the components.
 
 \subsection{User Interface}
+The primary access to the Semaps application happens in form of a website, where users will get visual information about a city. As a starting point, the city of Mannheim is set. The whole website is a responsive, single page web application with following user interface elements: 
+\begin{itemize}
+\item a search bar, where the user can search for specific places, cities, countries, and addresses
+\item Three buttons with additional information like a legend of colors, information about the project and a link to the open source repository which contains the code of the frontend
+\item A map in the background with colored clusters and relevant data markers in the city
+\end{itemize}
 
+In terms of technology, Semaps is entirely developed with the help of the \textit{React}\footnote{ \url{https://reactjs.org}}. React is a \textit{JavaScript}-based frontend framework which follows component-based design philosophy. This means that the interface is broken down to small, atomic subsections, also described as components, which can be reused in the entire application.
+\\ \\ 
+
+The base functionality of modern web applications can be enhanced through so-called package managers. Because React is based on the server architecture of \textit{NodeJS}\footnote{ \url{https://www.nodejs.org}} the used package manager here is \textit{NPM}\footnote{ \url{https://npmjs.org}}, which is short for Node Package Manager. With the help of such package managers, developers can use external functionalities bundled in packages, provided by other developers. In the case of Semaps, different packages were adapted. For example the package \textit{axios}\footnote{ \url{https://github.com/axios/axios}}, which provides an easier way of handling asynchronous HTTP requests. The two main packages used were \textit{leaflet}\footnote{ \url{https://leafletjs.com}} and \textit{react-leaflet}\footnote{ \url{https://react-leaflet.js.org}}. Those packages provide functionalities to implement different map features of \textit{Open Street Maps}\footnote{ \url{http://openstreetmap.org}}. At the same time, this builds the center of the Semaps User interface.
+
+To depict the computed clusters in the backend the defined standard format of \textit{geoJSON} files was used. A geoJSON file is a special kind of JSON files which includes a set of features. In the case of Semaps, those features were interesting data points and places, visualized by markers and the computed clusters in forms of colored rectangles. With the help of the geoJSON format, there is no major business logic necessary on the frontend. The geoJSON data is simply laid over the map and the different clusters are colored respectively.
+
+In the end, the application is deployed with the help of \textit{Heroku}\footnote{\url{https://heroku.com/}}, a popular and easy to use Platform-as-a-Service provider.
 
 \subsection{REST Interface}
-When a request is sent to the REST interface, the server reads given parameters and schedules the crawling and clustering of the data as well as the assembly of a response in the GeoJSON format. So the interface does not execute any functional computations; it rather passes on the request to different execution modules using Java dependency injection. The REST interface itself relies on the \textit{Spring Boot} framework and is hosted at the Platform-as-a-Service provider \textit{heroku}.\footnote{see \url{https://dashboard.heroku.com/login}} Spring Boot is a framework built on top of the spring framework, which facilitates the development of web applications and requires only very little configuration overhead. So it follows the architectural notion of microservices. 
+When a request is sent to the REST interface, the server reads given parameters and schedules the crawling and clustering of the data as well as the assembly of a response in the GeoJSON format. So the interface does not execute any functional computations; it rather passes on the request to different execution modules using Java dependency injection. The REST interface itself relies on the \textit{Spring Boot} framework and is hosted at the Platform-as-a-Service provider \textit{Heroku}. Spring Boot is a framework built on top of the spring framework, which facilitates the development of web applications and requires only very little configuration overhead. So it follows the architectural notion of microservices. 
 
 
 \subsection{Processing Pipeline}
