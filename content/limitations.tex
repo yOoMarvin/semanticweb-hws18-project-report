@@ -3,7 +3,15 @@ In which domains does the application not work? \\
 Are there queries which cannot be answered? \\
 Why? \\
 How could you overcome those limitations, given more time?
-\\ \\
+\\ 
 
 For the processing period of one month, the results and the information level of the application are very satisfactory. Nevertheless, there were some limitations, and therefore room for improvement, which should be described shortly in the following chapter.
 \\
+
+One major limitation of the project is the data quality. Of course, the clustering algorithm can only be as good as the data input. For some cities, there are a lot of imbalances when it comes to interesting city points. One example here would be the type \textit{ArchitecturalStructure} or \textit{Building} in the DB-Pedia dataset. Those to labels are rather general and therefore way more common than other labels like \textit{University} or \textit{Museum}. As a result, there are way more clusters in those general categories. To improve this problem in future development efforts, the data should be analyzed more specific and general labels should be ranked lower to create more balance.
+\\
+
+Another limitation besides the data quality is the availability of the data itself. Because of the fact that there is generally more data available for larger cities, the result for small cities and countryside villages is usually worse. Where the capital city of Germany, Berlin, has way over 100 data points and markers to evaluate clusters upon, the city of Bad D\"urkheim for example only has four data points in the DB Pedia dataset. Thus the computed clusters are limited by the availability of the data. One way to solve this would be the combination of different data sources in real-time. Especially for smaller cities, so that there is more of a balance between different cities. 
+\\
+
+A third limitation is described by the infrastructure itself. As already mentioned before, the Platform-as-a-Service provider Heroku was chosen for deployment for front- and backend. Because of limited resources the free tier of the deployment platform was chosen which brings one major disadvantage. If the application is inactive for a while it must be re-activated with the first request which usually results in a loading time around 15 seconds. Therefore some delays can happen on the user interface. This problem can simply be solved by upgrading to a Heroku premium plan\footnote{more infos under \url{https://www.heroku.com/pricing}}.
