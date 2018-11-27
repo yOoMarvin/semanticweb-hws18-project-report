@@ -67,7 +67,7 @@ The simple square clustering algorithm a rather straight-forward implementation 
 \end{algorithm}
 
 \paragraph{DBScan}
-DBScan is a the sophisticated clustering algorithm in the semap project and relies on the Weka library implementation. The DBScan tries to build clusters based on two pieces of information: The position of instances and their categories. The position is determined by the longitude and latitude coordinates and is normalized on a scale from zero to one; alternatively it can be z-normalized by a parameter setting in the Java coding. Categories are one-hot-encoded, so that each instance gets a vectors consisting of values in the range from one to zero. The vector represents the set of all categories. Each category is represented by a positional value in the vector. All the categories an instance does not belong to, take the value 0 in the vector. The categories, an instance belongs to, take a normalized value greater than zero. The value is determined by the formula: 
+DBScan is the one rather advanced clustering algorithm in the semap project and relies on the Weka library implementation. The DBScan tries to build clusters based on two pieces of information: The position of instances and their categories. The position is determined by the longitude and latitude coordinates and is normalized on a scale from zero to one; alternatively it can be z-normalized by a parameter setting in the Java coding. Categories are one-hot-encoded, so that each instance gets a vectors consisting of values in the range from one to zero. The vector represents the set of all categories. Each category is represented by a positional value in the vector. All the categories an instance does not belong to, take the value 0 in the vector. The categories, an instance belongs to, take a normalized value greater than zero. The value is determined by the formula: 
 \begin{equation}
 n := number~of~categories~of~an~instance
 \end{equation}
@@ -78,11 +78,9 @@ w_i := weight~of~the~i\-th~category~of~an~instance
 w_c := weight~of~current~category
 \end{equation}
 \begin{equation}\label{eq:normalization}
-val = \frac{w_c}{\sum_{i=0}^{n}w_i}
+val_c = \frac{w_c}{\sum_{i=0}^{n}w_i}
 \end{equation}
 
-
-Weight of current category/sum of categories of an instance(weight)
 So the value depends on the number of instance’s categories and the weight of the respective categories. This method ensures, that the weighted vector values have the same impact on the clustering as the positional information latitude and longitude. Before the DBScan algorithm can start working in Weka, a preprocessing pipeline transform the internal object representation as described in figure \ref{fig:cos} into the object representation needed by the Weka library. It therefore writes an artificial .arff-file to disk and reads it again with tools from the weka library. Afterwards, the DBScan is executed and the results again returned into the core object representation of semap. The entire procedure of the DBScan in the semap project is summarized in algorithm \ref{alg:dbscan} as follows:
 
 \begin{algorithm}
